@@ -108,15 +108,15 @@ for (var m = moment(a); m.isBefore(b); m.add(1, 'months')) {
   queue.push(tmp);
 }
 
-Promise.map(queue, function(m) {
-  console.log(m);
-  //return m();
-  return Promise.join(getTimespan(m));
-  //return m;
-  // *Now* we call the function. Since it returns a promise, the next iteration will not run until it resolves.
-  //  return queue_item();
-}, {concurrency: 1}).then(function() {
-  console.log("done!");
-});
+   Promise.map(queue, function(m) {
+   console.log(m);
+   //return m();
+   return Promise.join(getTimespan(m));
+   //return m;
+   // *Now* we call the function. Since it returns a promise, the next iteration will not run until it resolves.
+   //  return queue_item();
+   }, {concurrency: 1}).then(function() {
+   console.log("done!");
+   });
 
 */

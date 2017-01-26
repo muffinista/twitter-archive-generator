@@ -7,8 +7,11 @@
     "bluebird": "^3.4.7",
     "horseman": "^0.2.1",
     "lodash": "^4.17.4",
+    "mkdirp": "^0.5.1",
     "moment": "^2.17.1",
-    "node-horseman": "^3.2.0"
+    "node-horseman": "^3.2.0",
+    "sleep": "^5.1.0",
+    "twit": "^2.2.5"
   },
   "devDependencies": {},
   "scripts": {
