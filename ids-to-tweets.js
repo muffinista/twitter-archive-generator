@@ -42,7 +42,7 @@ fs.readdir("data", (err, files) => {
     mkdirp.sync("data/" + y + "/" + m);
 
     var ids = JSON.parse(fs.readFileSync("data/" + y + "-" + m + "-01.json"));
-//    console.log(ids);
+    //    console.log(ids);
 
     for ( var x = 0; x < ids.length; x++ ) {
       var id = ids[x];
@@ -58,12 +58,9 @@ fs.readdir("data", (err, files) => {
 
 });
 
-
-console.log("uggggggggggggggg");
 Promise.map(queue, function(m) {
   console.log(m);
   return getTweet(m.y, m.m, m.id);
-  //return Promise.join(getTimespan(m));
 }, {concurrency: 1}).then(function() {
   console.log("done!");
 });
