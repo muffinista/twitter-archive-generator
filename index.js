@@ -3,9 +3,15 @@ var _ = require('lodash');
 var Horseman = require('node-horseman');
 var moment = require('moment');
 var Promise = require("bluebird");
+var mkdirp = require('mkdirp');
 
 var conf = JSON.parse(fs.readFileSync('conf.json'));
 var handle = "realDonaldTrump";
+
+var dest = "data/" + handle + "/ids";
+
+mkdirp.sync(dest);
+
 var agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36";
 var horseman = new Horseman({
   phantomPath: conf.phantom,
@@ -39,7 +45,7 @@ var scrape = function() {
 			console.log(newIds);
       var oldLength = ids.length;
       ids = _.uniq(ids.concat(newIds));
-      fs.writeFileSync(month + ".json", JSON.stringify(ids));
+      fs.writeFileSync(dest + "/" + month + ".json", JSON.stringify(ids));
 
 			if ( ids.length !== oldLength ){
         console.log("get more");

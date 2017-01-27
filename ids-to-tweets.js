@@ -16,8 +16,8 @@ var getTweet = function(y, m, id) {
   return T.get("statuses/show/:id", {id: id}).
     catch(function (err) { console.log('caught error', err.stack) }).
     then(function(data) {
-      var dest = "data/" + y + "/" + m + "/" + id + ".json";
-      console.log(data.data);
+      var dest = "data/" + handle + "/tweets/" + y + "/" + m + "/" + id + ".json";
+      //console.log(data.data);
       fs.writeFile(dest, JSON.stringify(data.data), function() {
         sleep.sleep(2);
       });
@@ -26,28 +26,27 @@ var getTweet = function(y, m, id) {
 
 var queue = [];
 
-fs.readdir("data", (err, files) => {
+fs.readdir("data/" + handle + "/ids", (err, files) => {
   files.forEach(file => {
     if ( ! file.match(/.json$/) ) {
       return;
     }
-    console.log(file);
+    //console.log(file);
     var y, m, etc;
     etc = file.split(/-/);
 
     y = etc[0];
     m = etc[1];
 
-    console.log(y, m);
-    mkdirp.sync("data/" + y + "/" + m);
+    //console.log(y, m);
+    mkdirp.sync("data/" + handle + "/tweets/" + y + "/" + m);
 
-    var ids = JSON.parse(fs.readFileSync("data/" + y + "-" + m + "-01.json"));
-    //    console.log(ids);
+    var ids = JSON.parse(fs.readFileSync("data/" + handle + "/ids/" + + y + "-" + m + "-01.json"));
 
     for ( var x = 0; x < ids.length; x++ ) {
       var id = ids[x];
-      //console.log(id);
-      var dest = "data/" + y + "/" + m + "/" + id + ".json";
+      var dest = "data/" + handle + "/tweets/" + y + "/" + m + "/" + id + ".json";
+      console.log("look for " + dest);
       if (! fs.existsSync(dest)) {
         queue.push({y:y, m:m, id:id});
       }
