@@ -6,7 +6,23 @@ var Promise = require("bluebird");
 var mkdirp = require('mkdirp');
 
 var conf = JSON.parse(fs.readFileSync('conf.json'));
-var handle = "realDonaldTrump";
+
+var argv = require('minimist')(process.argv.slice(2));
+var handle = argv['_'][0];
+var month = argv['_'][1];
+
+if ( handle === undefined ) {
+  console.error("Please specify a handle!");
+  process.exit(1);
+}
+
+if ( month === undefined ) {
+  month = moment().format('YYYY-MM');
+  console.log("Setting month to " + month);
+}
+
+month = moment(month).format('YYYY-MM-01');
+
 
 var dest = "data/" + handle + "/ids";
 
@@ -19,7 +35,6 @@ var horseman = new Horseman({
 });
 
 var ids = [];
-var month = process.argv[2];
 
 var getIds = function() {
   console.log("getIds");
@@ -27,7 +42,7 @@ var getIds = function() {
 		// This code is executed in the browser.
     var _ids = [];
 		$("li[data-item-type='tweet']").each(function( item ){
-      var id = $(this).data("itemId");
+      var id = "" + $(this).data("itemId");
 			_ids.push(id);
 		});
 		return _ids;
@@ -37,7 +52,6 @@ var getIds = function() {
 
 var scrape = function() {
   console.log("SCRAPE " + month + " " + ids.length);
-
   
 	return new Promise( function( resolve, reject ){
 		return getIds()
@@ -45,6 +59,7 @@ var scrape = function() {
 			console.log(newIds);
       var oldLength = ids.length;
       ids = _.uniq(ids.concat(newIds));
+      console.log(dest + "/" + month + ".json");
       fs.writeFileSync(dest + "/" + month + ".json", JSON.stringify(ids));
 
 			if ( ids.length !== oldLength ){
@@ -69,9 +84,9 @@ var scrape = function() {
 
 var getTimespan = function() {
   var e = moment(month).add(1, 'months').format('YYYY-MM-DD');
-  var s = month;
+  var s = moment(month).format('YYYY-MM-DD');
 
-  console.log("TIMESPAN " + s);
+  console.log("TIMESPAN " + s + " -> " + e);
   
   var url = "https://twitter.com/search?f=tweets&vertical=default&q=from%3A" + handle +
             "%20since%3A" + s + "%20until%3A" + e + "&src=typd";
@@ -85,44 +100,12 @@ var getTimespan = function() {
                      return $.active == 0
                    },  true)
 	                 .then( scrape )
-	       .finally(function(){
-		       console.log("HERE" + ids.length)
-		       horseman.close();
-	       });
-
+	                 .finally(function(){
+		                 console.log("Loaded " + ids.length + " tweets")
+		                 horseman.close();
+	                 });
+  
 };
 
 
-
-//var a = moment('2009-03-01');
-//var a = moment('2009-05-01');
-//var b = moment('2017-01-01');
-
-//var tmp = moment(a);
-//console.log(tmp.format('YYYY-MM-DD'));
-//ids[tmp.format('YYYY-MM-DD')] = [];
-
-
 getTimespan(month);
-
-/*
-for (var m = moment(a); m.isBefore(b); m.add(1, 'months')) {
-  var tmp = moment(m);
-  console.log(tmp.format('YYYY-MM-DD'));
-  ids[tmp.format('YYYY-MM-DD')] = [];
-  //queue.push(getTimespan(tmp));
-  queue.push(tmp);
-}
-
-   Promise.map(queue, function(m) {
-   console.log(m);
-   //return m();
-   return Promise.join(getTimespan(m));
-   //return m;
-   // *Now* we call the function. Since it returns a promise, the next iteration will not run until it resolves.
-   //  return queue_item();
-   }, {concurrency: 1}).then(function() {
-   console.log("done!");
-   });
-
-*/
