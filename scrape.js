@@ -96,9 +96,6 @@ var getTimespan = function() {
                    .userAgent(agent)
                    .viewport(1024, 800)
                    .open(url)
-                   .waitFor(function noAjax() {
-                     return $.active == 0
-                   },  true)
 	                 .then( scrape )
 	                 .finally(function(){
 		                 console.log("Loaded " + ids.length + " tweets")

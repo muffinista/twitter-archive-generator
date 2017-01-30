@@ -66,10 +66,18 @@ var uploadArchive = function(name) {
 
 
 
+var writeArchives = require('./output-data');
+
 var uploadChanges = function() {
   console.log("look for changes");
   Object.keys(hasUpdates).forEach(function(name) {
-    uploadArchive(name);
+    if ( hasUpdates[name] === 1 ) {
+      console.log("update " + name);
+      writeArchives(name, function() {
+        uploadArchive(name);
+        hasUpdates[name] = 0;
+      });
+    }
   });
 };
 
@@ -87,6 +95,11 @@ var watch = function(list) {
   stream.on('connected', function (response) {
     console.log("connected!");
   });
+  stream.on('error', function (err) {
+    console.log("ERROR");
+    console.log(err);
+  });
+
   stream.on('tweet', function (tweet) {
     // Tweets created by the user.
     // Tweets which are retweeted by the user.
