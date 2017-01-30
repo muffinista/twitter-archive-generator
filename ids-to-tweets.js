@@ -13,6 +13,21 @@ var handle = argv['_'][0];
 
 var T = new Twit(conf.twitter);
 
+var writeTweet = require('./writeTweet');
+
+var chillOut = function() {
+  sleep.sleep(2);
+};
+
+var getTweet = function(y, m, id) {
+  return T.get("statuses/show/:id", {id: id}).
+           catch(function (err) { console.log('caught error', err.stack) }).
+           then(function(data) {
+             writeTweet(data.data, chillOut)
+           });
+};
+
+var queue = [];
 
 if ( handle === undefined ) {
   console.error("Please specify a handle!");
@@ -21,19 +36,6 @@ if ( handle === undefined ) {
 
 console.log("Loading tweets for " + handle);
 
-var getTweet = function(y, m, id) {
-  return T.get("statuses/show/:id", {id: id}).
-    catch(function (err) { console.log('caught error', err.stack) }).
-    then(function(data) {
-      var dest = "data/" + handle + "/tweets/" + y + "/" + m + "/" + id + ".json";
-      //console.log(data.data);
-      fs.writeFile(dest, JSON.stringify(data.data), function() {
-        sleep.sleep(2);
-      });
-    });
-};
-
-var queue = [];
 
 fs.readdir("data/" + handle + "/ids", (err, files) => {
   files.forEach(file => {
@@ -70,6 +72,7 @@ fs.readdir("data/" + handle + "/ids", (err, files) => {
 Promise.map(queue, function(m) {
   console.log(m);
   return getTweet(m.y, m.m, m.id);
+  
 }, {concurrency: 1}).then(function() {
   console.log("done!");
 });
