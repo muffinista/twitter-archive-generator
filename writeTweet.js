@@ -2,7 +2,6 @@ module.exports = function(t, cb) {
   var moment = require('moment');
   var fs = require('fs');
   var mkdirp = require('mkdirp');
-  
   var handle = t["user"]["screen_name"];
   var ts = moment(t["created_at"], 'dd MMM DD HH:mm:ss ZZ YYYY', 'en');
   var month = ts.format("MM");
@@ -18,9 +17,9 @@ module.exports = function(t, cb) {
       console.error(err);
     }
     else {
-      fs.writeFile(dest, JSON.stringify(t), function(err) {
-        cb(t)
-      });
+	fs.writeFile(dest, JSON.stringify(t), function(err) {
+	    cb(t)
+	});
     }
   });
 };
