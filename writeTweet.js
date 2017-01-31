@@ -18,7 +18,9 @@ module.exports = function(t, cb) {
       console.error(err);
     }
     else {
-      fs.writeFile(dest, JSON.stringify(t), cb(t));
+      fs.writeFile(dest, JSON.stringify(t), function(err) {
+        cb(t)
+      });
     }
   });
 };
