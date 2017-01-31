@@ -3,70 +3,16 @@ var _ = require('lodash');
 var Promise = require("bluebird");
 var Twit = require('twit');
 
+var writeTweet = require('./writeTweet');
+var uploadArchive = require('./uploadArchive');
+var writeArchives = require('./output-data');
+
 
 var conf = JSON.parse(fs.readFileSync('conf.json'));
 const LIST_ID = conf.list_id;
 
 var hasUpdates = {};
-
-var writeTweet = require('./writeTweet');
-
 var T = new Twit(conf.twitter);
-
-var AWS = require('aws-sdk');
-var ep = new AWS.Endpoint('s3.us.archive.org');
-
-var s3 = new AWS.S3({
-  endpoint: ep,
-  accessKeyId: conf.s3.accessKeyId,
-  secretAccessKey: conf.s3.secretAccessKey
-});
-
-
-var uploadToArchive = function(handle, ext) {
-  var src = "data/" + handle + "." + ext;
-
-  var fileStream = fs.createReadStream(src);
-  var params = {
-    Bucket: conf.bucket,
-    Key: handle + "." + ext,
-    Body: fileStream,
-    Metadata: {
-      "x-archive-meta-title": "Twitter archive for " + handle,
-      "x-archive-meta-subject": handle
-    }
-  };
-  
-  s3.putObject(params, function(err, data) {
-    if (err) {
-      console.log("Error", err);
-    }
-    else if (data) {
-      console.log("Upload Success", data.Location);
-      console.log(data);
-    }
-  });
-
-};
-
-var uploadArchive = function(name) {
-  s3.createBucket({Bucket: conf.bucket}, function(err, data) {
-
-    // we pretty much assume the only possible error here
-    // is that the bucket already exists. be careful!
-    if (err && err.code !== "BucketAlreadyExists") {
-      console.log(err);
-    }
-    else {
-      uploadToArchive(name, "json");
-      uploadToArchive(name, "csv");
-    }
-  });
-};
-
-
-
-var writeArchives = require('./output-data');
 
 var uploadChanges = function() {
   console.log("look for changes");
@@ -74,7 +20,7 @@ var uploadChanges = function() {
     if ( hasUpdates[name] === 1 ) {
       console.log("update " + name);
       writeArchives(name, function() {
-        uploadArchive(name);
+        uploadArchive(conf, name);
         hasUpdates[name] = 0;
       });
     }
@@ -95,6 +41,9 @@ var watch = function(list) {
   stream.on('connected', function (response) {
     console.log("connected!");
   });
+
+  // NOTE: including this callback means that if there is an error,
+  // twit will restart the stream for us
   stream.on('error', function (err) {
     console.log("ERROR");
     console.log(err);
