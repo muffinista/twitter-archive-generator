@@ -1,7 +1,8 @@
 module.exports = function(t, cb) {
   var moment = require('moment');
   var fs = require('fs');
-  var mkdirp = require('mkdirp');
+    var mkdirp = require('mkdirp');
+    console.log(t);
   var handle = t["user"]["screen_name"];
   var ts = moment(t["created_at"], 'dd MMM DD HH:mm:ss ZZ YYYY', 'en');
   var month = ts.format("MM");
@@ -11,7 +12,7 @@ module.exports = function(t, cb) {
 
   var destDir = "data/" + handle + "/tweets/" + year + "/" + month;
   var dest = destDir + "/" + id + ".json";
-
+    console.log(dest);
   mkdirp(destDir, function(err) {
     if (err) {
       console.error(err);
