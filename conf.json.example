@@ -1,0 +1,9 @@
+{
+  "list_id": "ID of twitter list to watch",
+  "twitter": {
+    "consumer_key":         "",
+    "consumer_secret":      "",
+    "access_token":         "",
+    "access_token_secret":  ""
+  }
+}

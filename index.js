@@ -7,7 +7,6 @@ var writeTweet = require('./writeTweet');
 var uploadArchive = require('./uploadArchive');
 var writeArchives = require('./output-data');
 
-
 var conf = JSON.parse(fs.readFileSync('conf.json'));
 const LIST_ID = conf.list_id;
 
@@ -20,7 +19,12 @@ var uploadChanges = function() {
     if ( hasUpdates[name] === 1 ) {
       console.log("update " + name);
       writeArchives(name, function() {
-        uploadArchive(conf, name);
+
+        // upload an archive?
+        if ( conf.s3 && conf.s3.accessKeyId ) {
+          uploadArchive(conf, name);
+        }
+
         hasUpdates[name] = 0;
       });
     }
@@ -29,14 +33,14 @@ var uploadChanges = function() {
 
 setInterval(uploadChanges, 1000*60*5);
 
+/**
+ * use the streaming api to watch for tweets from a list of users
+ */
 var watch = function(list) {
   console.log("WATCH", follow);
   var stream = T.stream('statuses/filter', {
     follow: list,                                           
     stringify_friend_ids: true
-  });
-  stream.on('friends', function (friendsMsg) {
-    console.log("i have friends!");
   });
   stream.on('connected', function (response) {
     console.log("connected!");
@@ -50,13 +54,13 @@ var watch = function(list) {
   });
 
   stream.on('tweet', function (tweet) {
-    // Tweets created by the user.
-    // Tweets which are retweeted by the user.
-    // Replies to any Tweet created by the user.
-    // Retweets of any Tweet created by the user.
-    // Manual replies, created without pressing a reply button (e.g. “@twitterapi I agree”).
+    // make sure the tweet is actually from a user we are following
+    // this filters out RTs, replies, etc
     if ( _.includes(list, tweet.user.id_str) ) {
       console.log(tweet);
+
+      // write the tweet to our archive
+      // @todo request a copy at archive.is too?
       writeTweet(tweet, function() {
         hasUpdates[tweet.user.screen_name] = 1;
       });
@@ -64,6 +68,9 @@ var watch = function(list) {
   });
 };
 
+/**
+ * query the twitter list, get a list of user ids, and then follow them
+ */
 T.get('lists/members', { list_id: LIST_ID }).
   catch(function (err) { console.log('caught error', err.stack) }).
   then(function(result) {

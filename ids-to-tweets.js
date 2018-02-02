@@ -23,9 +23,9 @@ var getTweet = function(y, m, id) {
   return T.get("statuses/show/:id", {id: id}).
            catch(function (err) { console.log('caught error', err.stack) }).
            then(function(data) {
-	       if ( data.data.user ) {
-		   writeTweet(data.data, chillOut);
-	       }
+	           if ( data.data.user ) {
+		           writeTweet(data.data, chillOut);
+	           }
            });
 };
 
@@ -60,8 +60,8 @@ fs.readdir("data/" + handle + "/ids", (err, files) => {
       var id = ids[x];
       var dest = "data/" + handle + "/tweets/" + y + "/" + m + "/" + id + ".json";
       //console.log("look for " + dest);
-	if (! fs.existsSync(dest)) {
-	    console.log("look for " + dest);
+	    if (! fs.existsSync(dest)) {
+	      console.log("look for " + dest);
         console.log("LOAD " + y + " " + m + " " + id);
         queue.push({y:y, m:m, id:id});
       }

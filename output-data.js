@@ -69,7 +69,9 @@ module.exports = function(handle, cb) {
     fs.readFile(root + "/" + fileStats.name, (err, data) => {
       if (err) throw err;
       var data = JSON.parse(data);
-      tweets.push(data);
+      if ( data["in_reply_to_user_id_str"] !== null ) {
+        tweets.push(data);
+      }
       next();
     });
   });
@@ -99,7 +101,6 @@ module.exports = function(handle, cb) {
     fs.writeFile("data/" + handle + ".json", JSON.stringify(results, null, 2), function() {
       cb(handle);
     });
-
   });
 };
 

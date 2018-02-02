@@ -84,7 +84,7 @@ var scrape = function() {
 
 var getTimespan = function() {
   var e = moment(month).add(1, 'months').format('YYYY-MM-DD');
-  var s = moment(month).format('YYYY-MM-DD');
+  var s = moment(month).add(-1, 'days').format('YYYY-MM-DD');
 
   console.log("TIMESPAN " + s + " -> " + e);
   
